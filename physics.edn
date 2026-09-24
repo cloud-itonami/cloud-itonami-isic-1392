@@ -1,0 +1,33 @@
+;; What this vertical's robot physically does, declared for
+;; kotoba.robotics.process (kotoba-lang/robotics). `kbb -M:dev:physics` runs it.
+;;
+;; README has no "Robotics premise" section. The plant cuts and sews finished
+;; fabric into bedding, curtains, towels and table linens. Its physical work
+;; here: carrying fabric rolls from the fabric store to the spreading/cutting
+;; table, and boxing finished bundles (e.g. folded towels or duvets).
+;;
+;; Every number without a cited source is marked `estimate` in its :basis.
+;; Replacing an estimate with a sourced value is this bot's growth work.
+{:physics/schema "itonami.physical-ai.spec.v1"
+ :repo "cloud-itonami/cloud-itonami-isic-1392"
+ :cases
+ [{:id :fabric-roll-to-spreader
+   :kind :transport
+   :procedure "AMR carries fabric rolls from the fabric store to the spreading machine at the cutting table"
+   :params {:mass-kg 90.0 :payload-kg 120.0 :distance-m 60.0 :v-max-mps 1.2 :a-max-mps2 0.6
+            :drive-force-n 400.0 :crr 0.015
+            :cog-height-m 0.30 :payload-cog-height-m 0.75 :support-half-length-m 0.30
+            :max-time-s 1200.0}
+   :sweep {:param :brake-decel-mps2 :values [0.5 1.0 1.5 2.0 2.5]}
+   :quantity :min-tipover-margin
+   :limit {:min 0.3 :basis "estimate: keep 30 % of the restoring moment in reserve for rolls stacked above the deck when the AMR brakes"}
+   :boundary {:lo 0.2 :hi 5.0}}
+  {:id :finished-bundle-to-carton
+   :kind :manipulator
+   :procedure "arm lifts a finished bundle (folded towels or a packed duvet) from the folding table into a shipping carton"
+   :params {:l1-m 0.50 :l2-m 0.45 :m1-kg 5.0 :m2-kg 3.5
+            :from [0.30 0.55] :to [0.65 -0.10] :duration-s 1.8 :steps 400}
+   :sweep {:param :payload-kg :values [1.0 2.0 3.0 4.5 6.0]}
+   :quantity :peak-tau1-nm
+   :limit {:max 50.0 :basis "estimate: continuous shoulder torque of a light collaborative arm (~5 kg class)"}
+   :boundary {:lo 0.2 :hi 30.0}}]}
